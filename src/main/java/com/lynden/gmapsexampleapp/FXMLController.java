@@ -40,9 +40,8 @@ public class FXMLController extends Application implements Initializable, MapCom
     @Override
     public void mapInitialized() {
 
-        // get parameters
-        String location1 = parameters[0];
-        String location2 = parameters[1];
+       /* // get parameters
+        parse and get locations*/
 
 
         LatLong joeSmithLocation = new LatLong(47.6197, -122.3231);
@@ -121,12 +120,9 @@ public class FXMLController extends Application implements Initializable, MapCom
     }
 
     public static void main(String[] args) {
-        // input args
-        // location1 = args[0]
-        // location2 = args[1]
-        // title = Code, Product
-        // desc = arriveTime, details
-        // ...
+        // example run
+        // java -jar some.jar lat1:23.2323 log1:11.12111 title1:SomeTitle lat2...
+
         parameters = args;
 
         launch(args);
