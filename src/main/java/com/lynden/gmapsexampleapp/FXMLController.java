@@ -20,6 +20,9 @@ import javafx.stage.Stage;
 
 public class FXMLController extends Application implements Initializable, MapComponentInitializedListener {
 
+
+    private static String[] parameters;
+
     @FXML
     private Button button;
 
@@ -28,6 +31,7 @@ public class FXMLController extends Application implements Initializable, MapCom
 
     private GoogleMap map;
 
+    // when load called
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         mapView.addMapInializedListener(this);
@@ -35,6 +39,11 @@ public class FXMLController extends Application implements Initializable, MapCom
 
     @Override
     public void mapInitialized() {
+
+        // get parameters
+        String location1 = parameters[0];
+        String location2 = parameters[1];
+
 
         LatLong joeSmithLocation = new LatLong(47.6197, -122.3231);
         LatLong joshAndersonLocation = new LatLong(47.6297, -122.3431);
@@ -105,8 +114,6 @@ public class FXMLController extends Application implements Initializable, MapCom
         AnchorPane anchorPane = fxmlLoader.load();
         FXMLController controller = fxmlLoader.getController();
 
-
-
         Scene scene = new Scene(anchorPane);
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -114,6 +121,14 @@ public class FXMLController extends Application implements Initializable, MapCom
     }
 
     public static void main(String[] args) {
+        // input args
+        // location1 = args[0]
+        // location2 = args[1]
+        // title = Code, Product
+        // desc = arriveTime, details
+        // ...
+        parameters = args;
+
         launch(args);
     }
 
