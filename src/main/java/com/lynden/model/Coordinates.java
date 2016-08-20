@@ -7,20 +7,30 @@ import com.lynden.gmapsfx.javascript.object.LatLong;
  */
 public class Coordinates {
 
-    private LatLong coordinates;
+    private double latitude;
+    private double longitude;
     private String title;
 
-    public Coordinates(LatLong coordinates, String title) {
-        this.coordinates = coordinates;
+    public Coordinates(double latitude, double longitude, String title) {
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.title = title;
     }
 
-    public LatLong getCoordinates() {
-        return coordinates;
+    public double getLatitude() {
+        return latitude;
     }
 
-    public void setCoordinates(LatLong coordinates) {
-        this.coordinates = coordinates;
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     public String getTitle() {

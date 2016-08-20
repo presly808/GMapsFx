@@ -5,9 +5,7 @@ import com.lynden.gmapsfx.MapComponentInitializedListener;
 import com.lynden.gmapsfx.javascript.object.*;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import com.lynden.model.Coordinates;
 import javafx.application.Application;
@@ -29,12 +27,18 @@ public class FXMLController extends Application implements Initializable, MapCom
     private static double sumLat = 0;
     private static double sumLong = 0;
     private int countMarkers = 0;
-    private static String[] parameters = {"lat1:39.6197 long1:-122.3231 title1:Test1",
+
+    private static String[] parameters;
+    /*private static String[] parameters = {"lat1:1", "long1:1","title1:Test1","lat2:2","long3:3",
+            "long2:2","lat3:3","title2:Test2","title3:Test3"};*/
+  /*  private static String[] parameters = {"lat1:39.6197 long1:-122.3231 title1:Test1",
                                           "lat1:42.6197 long1:-122.3231 title1:Test2",
                                           "lat1:41.6197 long1:-124.3231 title1:Test3",
-                                          "lat1:41.6197 long1:-121.3231 title1:Test4"};
+                                          "lat1:41.6197 long1:-121.3231 title1:Test4"};*/
 
-    private List<Coordinates> coordinates = new ArrayList<>();
+   // private List<Coordinates> coordinates = new ArrayList<>();
+
+    private Map<Integer,Coordinates> coordinates = new HashMap<>();
 
     @FXML
     private Button button;
@@ -92,16 +96,49 @@ public class FXMLController extends Application implements Initializable, MapCom
         for (String temp  : parameters) {
 
             // Parsing lat,long,title from incoming data.
+            double latitude = 0.0;
+            double longitude = 0.0;
+            String title = "null";
+            int place = 0;
 
-            String[] markerInfo = temp.split(" ");
-            double latitude = Double.parseDouble(markerInfo[LAT_POSITION].split(":")[1]);
-            double longitude = Double.parseDouble(markerInfo[LONG_POSITION].split(":")[1]);
-            String title = markerInfo[TITLE_POSITION].split(":")[1];
+            if (temp.contains("lat")){
+
+                place = Integer.parseInt(temp.substring(3,4));
+                latitude = Double.parseDouble(temp.split(":")[1]);
+                if(coordinates.containsKey(place)){
+                    coordinates.get(place).setLatitude(latitude);
+                } else {
+                    coordinates.put(place,new Coordinates(latitude,0,null));
+                }
+            }
+
+            if (temp.contains("long")){
+                place = Integer.parseInt(temp.substring(4,5));
+                longitude = Double.parseDouble(temp.split(":")[1]);
+                if(coordinates.containsKey(place)){
+                    coordinates.get(place).setLongitude(longitude);
+                } else {
+                    coordinates.put(place,new Coordinates(0,longitude,null));
+                }
+            }
+
+            if (temp.contains("title")){
+
+                place = Integer.parseInt(temp.substring(5,6));
+                title = temp.split(":")[1];
+                if(coordinates.containsKey(place)){
+                    coordinates.get(place).setTitle(title);
+                } else {
+                    coordinates.put(place,new Coordinates(0,0,title));
+                }
+            }
+
 
             // Adding into List.
 
-            Coordinates point = new Coordinates(new LatLong(latitude,longitude),title);
-            coordinates.add(point);
+
+            //  Coordinates point = new Coordinates(new LatLong(latitude,longitude),title);
+            // coordinates.add();
 
 
             // Calculation  sum and count.
@@ -115,25 +152,31 @@ public class FXMLController extends Application implements Initializable, MapCom
 
     private void putMapMarkers() {
 
-        for (Coordinates coordinate : coordinates) {
+        for (Map.Entry<Integer,Coordinates> coordinate : coordinates.entrySet()) {
 
-            // Definition position of marker on the map.
+            // Checking is Value of map not empty.
 
-            LatLong mapPoint = coordinate.getCoordinates();
-            MarkerOptions markerOption = new MarkerOptions();
-            markerOption.position(mapPoint);
+            if (coordinate.getValue().getLatitude() != 0 && coordinate.getValue().getLongitude() != 0) {
 
-            // Creation new marker and placing it on the map.
+                // Definition position of marker on the map.
 
-            Marker marker = new Marker(markerOption);
-            map.addMarker(marker);
+                LatLong mapPoint = new LatLong(coordinate.getValue().getLatitude(),
+                                               coordinate.getValue().getLongitude());
+                MarkerOptions markerOption = new MarkerOptions();
+                markerOption.position(mapPoint);
 
-            // Creation InfoWindow and placing it on the map.
+                // Creation new marker and placing it on the map.
 
-            InfoWindowOptions tempInfoWindowOptions= new InfoWindowOptions();
-            tempInfoWindowOptions.content(coordinate.getTitle());
-            InfoWindow tempInfoWindow = new InfoWindow(tempInfoWindowOptions);
-            tempInfoWindow.open(map, marker);
+                Marker marker = new Marker(markerOption);
+                map.addMarker(marker);
+
+                // Creation InfoWindow and placing it on the map.
+
+                InfoWindowOptions tempInfoWindowOptions = new InfoWindowOptions();
+                tempInfoWindowOptions.content(coordinate.getValue().getTitle());
+                InfoWindow tempInfoWindow = new InfoWindow(tempInfoWindowOptions);
+                tempInfoWindow.open(map, marker);
+            }
         }
 
 
@@ -160,7 +203,7 @@ public class FXMLController extends Application implements Initializable, MapCom
         // example run
         // java -jar some.jar lat1:23.2323 log1:11.12111 title1:SomeTitle lat2...
 
-     //   parameters = args;
+        parameters = args;
 
         launch(args);
     }
