@@ -1,13 +1,15 @@
 package com.lynden.gmapsexampleapp;
 
 import com.lynden.gmapsfx.GoogleMapView;
-import com.lynden.gmapsfx.MainApp;
 import com.lynden.gmapsfx.MapComponentInitializedListener;
 import com.lynden.gmapsfx.javascript.object.*;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import com.lynden.model.Coordinates;
 import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,7 +23,18 @@ import javafx.stage.Stage;
 public class FXMLController extends Application implements Initializable, MapComponentInitializedListener {
 
 
-    private static String[] parameters;
+    private static final int LAT_POSITION = 0;
+    private static final int LONG_POSITION = 1;
+    private static final int TITLE_POSITION = 2;
+    private static double sumLat = 0;
+    private static double sumLong = 0;
+    private int countMarkers = 0;
+    private static String[] parameters = {"lat1:39.6197 long1:-122.3231 title1:Test1",
+                                          "lat1:42.6197 long1:-122.3231 title1:Test2",
+                                          "lat1:41.6197 long1:-124.3231 title1:Test3",
+                                          "lat1:41.6197 long1:-121.3231 title1:Test4"};
+
+    private List<Coordinates> coordinates = new ArrayList<>();
 
     @FXML
     private Button button;
@@ -43,17 +56,26 @@ public class FXMLController extends Application implements Initializable, MapCom
        /* // get parameters
         parse and get locations*/
 
+        if (parameters == null) {
+            System.out.println("invalid input parameters");
+            return;
+        }
 
-        LatLong joeSmithLocation = new LatLong(47.6197, -122.3231);
-        LatLong joshAndersonLocation = new LatLong(47.6297, -122.3431);
-        LatLong bobUnderwoodLocation = new LatLong(47.6397, -122.3031);
-        LatLong tomChoiceLocation = new LatLong(47.6497, -122.3325);
-        LatLong fredWilkieLocation = new LatLong(47.6597, -122.3357);
+        // Parsing String.
+        parseString();
 
         //Set the initial properties of the map.
-        MapOptions mapOptions = new MapOptions();
+        setMapOptions();
 
-        mapOptions.center(new LatLong(47.6097, -122.3331))
+        //Put marker's on the map.
+        putMapMarkers();
+
+    }
+
+    private void setMapOptions() {
+
+        MapOptions mapOptions = new MapOptions();
+        mapOptions.center(new LatLong(sumLat/countMarkers, sumLong/countMarkers))
                 .mapType(MapTypeIdEnum.ROADMAP)
                 .overviewMapControl(false)
                 .panControl(false)
@@ -61,45 +83,60 @@ public class FXMLController extends Application implements Initializable, MapCom
                 .scaleControl(false)
                 .streetViewControl(false)
                 .zoomControl(false)
-                .zoom(12);
-
+                .zoom(7);
         map = mapView.createMap(mapOptions);
+    }
 
-        //Add markers to the map
-        MarkerOptions markerOptions1 = new MarkerOptions();
-        markerOptions1.position(joeSmithLocation);
+    private void parseString() {
 
-        MarkerOptions markerOptions2 = new MarkerOptions();
-        markerOptions2.position(joshAndersonLocation);
+        for (String temp  : parameters) {
 
-        MarkerOptions markerOptions3 = new MarkerOptions();
-        markerOptions3.position(bobUnderwoodLocation);
+            // Parsing lat,long,title from incoming data.
 
-        MarkerOptions markerOptions4 = new MarkerOptions();
-        markerOptions4.position(tomChoiceLocation);
+            String[] markerInfo = temp.split(" ");
+            double latitude = Double.parseDouble(markerInfo[LAT_POSITION].split(":")[1]);
+            double longitude = Double.parseDouble(markerInfo[LONG_POSITION].split(":")[1]);
+            String title = markerInfo[TITLE_POSITION].split(":")[1];
 
-        MarkerOptions markerOptions5 = new MarkerOptions();
-        markerOptions5.position(fredWilkieLocation);
+            // Adding into List.
 
-        Marker joeSmithMarker = new Marker(markerOptions1);
-        Marker joshAndersonMarker = new Marker(markerOptions2);
-        Marker bobUnderwoodMarker = new Marker(markerOptions3);
-        Marker tomChoiceMarker= new Marker(markerOptions4);
-        Marker fredWilkieMarker = new Marker(markerOptions5);
+            Coordinates point = new Coordinates(new LatLong(latitude,longitude),title);
+            coordinates.add(point);
 
-        map.addMarker( joeSmithMarker );
-        map.addMarker( joshAndersonMarker );
-        map.addMarker( bobUnderwoodMarker );
-        map.addMarker( tomChoiceMarker );
-        map.addMarker( fredWilkieMarker );
 
-        InfoWindowOptions infoWindowOptions = new InfoWindowOptions();
-        infoWindowOptions.content("<h2>Fred Wilkie</h2>"
-                + "Current Location: Safeway<br>"
-                + "ETA: 45 minutes" );
+            // Calculation  sum and count.
 
-        InfoWindow fredWilkeInfoWindow = new InfoWindow(infoWindowOptions);
-        fredWilkeInfoWindow.open(map, fredWilkieMarker);
+            sumLat = sumLat + latitude;
+            sumLong = sumLong + longitude;
+            countMarkers++;
+
+        }
+    }
+
+    private void putMapMarkers() {
+
+        for (Coordinates coordinate : coordinates) {
+
+            // Definition position of marker on the map.
+
+            LatLong mapPoint = coordinate.getCoordinates();
+            MarkerOptions markerOption = new MarkerOptions();
+            markerOption.position(mapPoint);
+
+            // Creation new marker and placing it on the map.
+
+            Marker marker = new Marker(markerOption);
+            map.addMarker(marker);
+
+            // Creation InfoWindow and placing it on the map.
+
+            InfoWindowOptions tempInfoWindowOptions= new InfoWindowOptions();
+            tempInfoWindowOptions.content(coordinate.getTitle());
+            InfoWindow tempInfoWindow = new InfoWindow(tempInfoWindowOptions);
+            tempInfoWindow.open(map, marker);
+        }
+
+
     }
 
     @Override
@@ -123,7 +160,7 @@ public class FXMLController extends Application implements Initializable, MapCom
         // example run
         // java -jar some.jar lat1:23.2323 log1:11.12111 title1:SomeTitle lat2...
 
-        parameters = args;
+     //   parameters = args;
 
         launch(args);
     }
