@@ -29,6 +29,9 @@ public class FXMLController extends Application implements Initializable, MapCom
     private static double sumLat = 0;
     private static double sumLong = 0;
     private int countMarkers = 0;
+
+    // right input data
+    // private static String[] par = {"lat1:39.6197", "long1:-122.3231"};
     private static String[] parameters = {"lat1:39.6197 long1:-122.3231 title1:Test1",
                                           "lat1:42.6197 long1:-122.3231 title1:Test2",
                                           "lat1:41.6197 long1:-124.3231 title1:Test3",
